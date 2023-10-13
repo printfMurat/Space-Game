@@ -10,6 +10,12 @@ using UnityEditor;
 public class CharacterControl : MonoBehaviour
 {
 
+    public Transform Player;
+    public Transform[] CheckPoints;
+    public float songSpeedIncrease = 0.15f;
+    public int CurrentCheckpoint = 0;
+
+    
     public TextMeshProUGUI HealthText;
     public TextMeshProUGUI ScoreText;
     public TextMeshProUGUI IngameScoreText;
@@ -18,15 +24,23 @@ public class CharacterControl : MonoBehaviour
     public AudioSource kapat2;
     public AudioSource DeathAudio;
     public AudioSource LifeAudio;
-    
+    public AudioSource Space;
+
+
 
     public GameObject GameOverPanel;
     public GameObject BackButton;
    
+
     public Transform spawnPoint;
     public int maxHealth = 3;
     private int currentHealth;
     private int score = 0;
+
+
+
+
+
 
 
     public Slider timerSlider; // Slider nesnesi
@@ -49,6 +63,12 @@ public class CharacterControl : MonoBehaviour
         timerSlider.value = currentTime;
 
         IngameScoreText.text = "Score : 0";
+
+        CurrentCheckpoint = 0;
+
+
+
+
     }
 
     private void Update()
@@ -66,6 +86,30 @@ public class CharacterControl : MonoBehaviour
             }
         }
         HealthText.text = currentHealth.ToString();
+
+
+
+
+        Vector3 playerPosition = Player.position;
+        playerPosition.y = 0;
+        playerPosition = Player.position;
+
+        // Oyuncu objesi, þu anki bölümün yüksekliðinin üzerine çýktýðýnda bir sonraki bölüme geçer
+        if (Player.position.y >= CheckPoints[CurrentCheckpoint].position.y)
+        {
+            CurrentCheckpoint++;
+
+           
+            if (CurrentCheckpoint >= CheckPoints.Length)
+            {
+                enabled = false;
+                return;
+            }
+
+            // Þarký hýzýný artýr
+            
+           Space.pitch += songSpeedIncrease;
+        }
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -99,7 +143,7 @@ public class CharacterControl : MonoBehaviour
             StopTimer();
             StartTimer();
             Destroy(collision.gameObject);
-         }
+        }
 
 
     }
@@ -120,6 +164,7 @@ public class CharacterControl : MonoBehaviour
     {
 
         transform.position = spawnPoint.position;
+        CurrentCheckpoint = 0;
     }
 
     private void DestroyCharacter()
@@ -131,6 +176,7 @@ public class CharacterControl : MonoBehaviour
         GameOverPanel.SetActive(true);
         BackButton.SetActive(false);
         ScoreText.text = "Your Score is " + score.ToString();
+        timerSlider.gameObject.SetActive(false);
     }
 }
 
